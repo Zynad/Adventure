@@ -11,6 +11,7 @@ public class InitiateCombatCommandHandler : IRequestHandler<InitiateCombatComman
 {
     private readonly IRepository<Domain.Entities.Character> _characterRepo;
     private readonly IRepository<Monster> _monsterRepo;
+    private readonly IRepository<CharacterKnownSpell> _knownSpellRepo;
     private readonly ICombatEncounterStore _encounterStore;
     private readonly IDiceService _dice;
     private readonly CombatTurnResolver _turnResolver;
@@ -18,12 +19,14 @@ public class InitiateCombatCommandHandler : IRequestHandler<InitiateCombatComman
     public InitiateCombatCommandHandler(
         IRepository<Domain.Entities.Character> characterRepo,
         IRepository<Monster> monsterRepo,
+        IRepository<CharacterKnownSpell> knownSpellRepo,
         ICombatEncounterStore encounterStore,
         IDiceService dice,
         CombatTurnResolver turnResolver)
     {
         _characterRepo = characterRepo;
         _monsterRepo = monsterRepo;
+        _knownSpellRepo = knownSpellRepo;
         _encounterStore = encounterStore;
         _dice = dice;
         _turnResolver = turnResolver;
@@ -39,6 +42,12 @@ public class InitiateCombatCommandHandler : IRequestHandler<InitiateCombatComman
 
         if (character.CurrentHitPoints <= 0)
             throw new InvalidOperationException("Character is dead and cannot enter combat.");
+
+        // Load known spells for the character so FromCharacter can populate spell data
+        var knownSpellJoins = await _knownSpellRepo.FindAsync(
+            ks => ks.CharacterId == character.Id, cancellationToken);
+        foreach (var ks in knownSpellJoins)
+            character.KnownSpells.Add(ks);
 
         var encounter = CombatEncounter.Create(request.CharacterId);
 

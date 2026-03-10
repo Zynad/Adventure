@@ -1,3 +1,9 @@
+export interface SpellSlotDto {
+  level: number;
+  maxSlots: number;
+  currentSlots: number;
+}
+
 export interface Character {
   id: string;
   name: string;
@@ -18,6 +24,7 @@ export interface Character {
   currentZoneId: string;
   positionX: number;
   positionY: number;
+  spellSlots: SpellSlotDto[] | null;
 }
 
 export interface ZoneDto {
@@ -133,6 +140,42 @@ export interface CombatConsumableDto {
   effectType: string;
   effectValue: number;
   quantity: number;
+}
+
+export interface CombatSpellDto {
+  spellId: string;
+  name: string;
+  spellLevel: number;
+  damageDice: string | null;
+  healingDice: string | null;
+  isCantrip: boolean;
+  canCast: boolean;
+  targetType: 'enemy' | 'ally' | 'self' | 'none';
+}
+
+export interface CombatSpellInfoDto {
+  spells: CombatSpellDto[];
+  spellSlots: SpellSlotDto[];
+}
+
+export interface KnownSpellDto {
+  spellId: string;
+  name: string;
+  description: string;
+  spellLevel: number;
+  school: number;
+  damageDice: string | null;
+  damageType: number | null;
+  healingDice: string | null;
+  isCantrip: boolean;
+  canCast: boolean;
+}
+
+export interface CharacterSpellInfoDto {
+  knownSpells: KnownSpellDto[];
+  spellSlots: SpellSlotDto[];
+  spellSaveDC: number | null;
+  spellAttackBonus: number | null;
 }
 
 export interface DialogueNodeDto {

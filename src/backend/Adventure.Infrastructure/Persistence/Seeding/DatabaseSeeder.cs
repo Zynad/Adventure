@@ -23,6 +23,7 @@ public static class DatabaseSeeder
         await SeedNpcsAsync(context, dataPath);
         await SeedMonstersAsync(context, dataPath);
         await SeedItemsAsync(context, dataPath);
+        await SeedSpellsAsync(context, dataPath);
 
         await context.SaveChangesAsync();
     }
@@ -103,6 +104,27 @@ public static class DatabaseSeeder
                 s.ChallengeRating, s.ExperienceReward,
                 s.AttackDice, (DamageType)s.DamageType, (AIStrategy)s.AiStrategy, s.LootTableId);
             await context.Monsters.AddAsync(monster);
+        }
+    }
+
+    private static async Task SeedSpellsAsync(AdventureDbContext context, string dataPath)
+    {
+        var filePath = Path.Combine(dataPath, "spells.json");
+        if (!File.Exists(filePath))
+            return;
+
+        var json = await File.ReadAllTextAsync(filePath);
+        var seeds = JsonSerializer.Deserialize<List<SpellSeed>>(json, JsonOptions)!;
+
+        foreach (var s in seeds)
+        {
+            var spell = Spell.CreateForSeed(
+                s.Id, s.Name, s.Description, s.SpellLevel,
+                (SpellSchool)s.School, s.CastingTime, s.Range, s.Duration,
+                s.DamageDice, s.DamageType.HasValue ? (DamageType)s.DamageType.Value : null,
+                s.HealingDice, s.SavingThrowAbility.HasValue ? (AbilityType)s.SavingThrowAbility.Value : null,
+                (CharacterClass)s.RequiredClass, s.RequiresAttackRoll);
+            await context.Spells.AddAsync(spell);
         }
     }
 

@@ -9,5 +9,10 @@ public class CharacterKnownSpellConfiguration : IEntityTypeConfiguration<Charact
     public void Configure(EntityTypeBuilder<CharacterKnownSpell> builder)
     {
         builder.HasKey(cks => new { cks.CharacterId, cks.SpellId });
+
+        builder.HasOne(cks => cks.Spell)
+            .WithMany()
+            .HasForeignKey(cks => cks.SpellId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

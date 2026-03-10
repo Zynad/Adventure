@@ -1,6 +1,8 @@
+using System.Text.Json;
 using Adventure.Domain.Enums;
 using Adventure.Domain.Events;
 using Adventure.Domain.Rules;
+using Adventure.Domain.ValueObjects;
 
 namespace Adventure.Domain.Entities;
 
@@ -35,9 +37,13 @@ public class Character : IHasDomainEvents
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
+    // Spell slots (JSON-serialized)
+    public string? SpellSlotsJson { get; private set; }
+
     // Navigation properties
     public ICollection<InventorySlot> Inventory { get; private set; } = new List<InventorySlot>();
     public ICollection<EquippedItem> Equipment { get; private set; } = new List<EquippedItem>();
+    public ICollection<CharacterKnownSpell> KnownSpells { get; private set; } = new List<CharacterKnownSpell>();
     public ICollection<CharacterQuest> Quests { get; private set; } = new List<CharacterQuest>();
     public ICollection<CharacterFactionReputation> Reputations { get; private set; } = new List<CharacterFactionReputation>();
     public ICollection<CharacterProfession> Professions { get; private set; } = new List<CharacterProfession>();
@@ -104,6 +110,62 @@ public class Character : IHasDomainEvents
         UpdatedAt = DateTime.UtcNow;
     }
 
+    public List<SpellSlot> GetSpellSlots()
+    {
+        if (SpellSlotsJson is not null)
+            return JsonSerializer.Deserialize<List<SpellSlot>>(SpellSlotsJson) ?? [];
+
+        return BuildSpellSlotsFromTable();
+    }
+
+    public void UseSpellSlot(int spellLevel)
+    {
+        var slots = GetSpellSlots();
+        for (var i = 0; i < slots.Count; i++)
+        {
+            if (slots[i].Level >= spellLevel && slots[i].HasAvailableSlot)
+            {
+                slots[i] = slots[i].UseSlot();
+                SpellSlotsJson = JsonSerializer.Serialize(slots);
+                UpdatedAt = DateTime.UtcNow;
+                return;
+            }
+        }
+
+        throw new InvalidOperationException($"No available spell slot for level {spellLevel}.");
+    }
+
+    public void RestoreAllSpellSlots()
+    {
+        var slots = BuildSpellSlotsFromTable();
+        SpellSlotsJson = JsonSerializer.Serialize(slots);
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void InitializeSpellSlots()
+    {
+        if (!SpellSlotTable.IsSpellcaster(Class))
+            return;
+
+        var slots = BuildSpellSlotsFromTable();
+        SpellSlotsJson = JsonSerializer.Serialize(slots);
+    }
+
+    public void SetSpellSlotsFromList(List<SpellSlot> slots)
+    {
+        SpellSlotsJson = JsonSerializer.Serialize(slots);
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    private List<SpellSlot> BuildSpellSlotsFromTable()
+    {
+        var maxSlots = SpellSlotTable.GetMaxSlots(Class, Level);
+        return maxSlots
+            .OrderBy(kvp => kvp.Key)
+            .Select(kvp => new SpellSlot(kvp.Key, kvp.Value, kvp.Value))
+            .ToList();
+    }
+
     public void ChangeZone(Guid newZoneId, int spawnX, int spawnY, Guid previousZoneId)
     {
         CurrentZoneId = newZoneId;
@@ -128,7 +190,7 @@ public class Character : IHasDomainEvents
         var conModifier = AbilityModifierCalculator.Calculate(con);
         var baseHp = 10 + conModifier; // Simplified starting HP
 
-        return new Character
+        var character = new Character
         {
             Id = Guid.NewGuid(),
             Name = name,
@@ -152,5 +214,8 @@ public class Character : IHasDomainEvents
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
+
+        character.InitializeSpellSlots();
+        return character;
     }
 }

@@ -25,6 +25,12 @@ internal record ZoneConnectionSeed(
     Guid Id, Guid FromZoneId, Guid ToZoneId,
     int FromX, int FromY, int ToX, int ToY);
 
+internal record SpellSeed(
+    Guid Id, string Name, string Description, int SpellLevel,
+    int School, string CastingTime, string Range, string Duration,
+    string? DamageDice, int? DamageType, string? HealingDice,
+    int? SavingThrowAbility, int RequiredClass, bool RequiresAttackRoll);
+
 internal record ItemSeed(
     Guid Id, string Type, string Name, string Description,
     int ItemType, int Rarity, decimal Weight, int BaseValue, bool IsStackable,

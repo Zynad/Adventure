@@ -7,5 +7,6 @@ public enum CombatCondition
     Hidden,
     Helped,
     HasAdvantage,
-    HasDisadvantage
+    HasDisadvantage,
+    Shielded
 }

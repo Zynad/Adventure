@@ -1,6 +1,7 @@
 using Adventure.Domain.Entities;
 using Adventure.Domain.Enums;
 using Adventure.Domain.Rules;
+using Adventure.Domain.ValueObjects;
 
 namespace Adventure.Domain.Combat;
 
@@ -18,11 +19,17 @@ public class CombatParticipant
     public bool IsAlive => CurrentHp > 0;
     public int Strength { get; private set; }
     public int Dexterity { get; private set; }
+    public int Constitution { get; private set; }
+    public int Intelligence { get; private set; }
     public int Wisdom { get; private set; }
+    public int Charisma { get; private set; }
     public int Level { get; private set; }
     public string AttackDice { get; private set; } = string.Empty;
     public DamageType DamageType { get; private set; }
     public AIStrategy? AiStrategy { get; private set; }
+    public CharacterClass? CharacterClass { get; private set; }
+    public List<SpellSlot> SpellSlots { get; private set; } = [];
+    public List<Guid> KnownSpellIds { get; private set; } = [];
     public IReadOnlySet<CombatCondition> ActiveConditions => _activeConditions;
 
     private CombatParticipant() { }
@@ -58,8 +65,11 @@ public class CombatParticipant
         {
             AbilityType.Strength => Strength,
             AbilityType.Dexterity => Dexterity,
+            AbilityType.Constitution => Constitution,
+            AbilityType.Intelligence => Intelligence,
             AbilityType.Wisdom => Wisdom,
-            _ => Strength
+            AbilityType.Charisma => Charisma,
+            _ => throw new ArgumentOutOfRangeException(nameof(ability))
         };
         return AbilityModifierCalculator.Calculate(score);
     }
@@ -67,6 +77,46 @@ public class CombatParticipant
     public int GetProficiencyBonus() => ProficiencyBonusTable.GetBonus(Level);
 
     public int GetPassivePerception() => 10 + GetAbilityModifier(AbilityType.Wisdom);
+
+    public bool HasSpellSlot(int spellLevel)
+    {
+        return SpellSlots.Any(s => s.Level >= spellLevel && s.HasAvailableSlot);
+    }
+
+    public void UseSpellSlot(int spellLevel)
+    {
+        for (var i = 0; i < SpellSlots.Count; i++)
+        {
+            if (SpellSlots[i].Level >= spellLevel && SpellSlots[i].HasAvailableSlot)
+            {
+                SpellSlots[i] = SpellSlots[i].UseSlot();
+                return;
+            }
+        }
+
+        throw new InvalidOperationException($"No available spell slot for level {spellLevel}.");
+    }
+
+    public int GetSpellcastingAbilityModifier()
+    {
+        var ability = CharacterClass.HasValue
+            ? SpellcastingAbilityTable.GetSpellcastingAbility(CharacterClass.Value)
+            : null;
+
+        return ability.HasValue ? GetAbilityModifier(ability.Value) : 0;
+    }
+
+    public int GetSpellSaveDC() => 8 + GetProficiencyBonus() + GetSpellcastingAbilityModifier();
+
+    public int GetSpellAttackBonus() => GetProficiencyBonus() + GetSpellcastingAbilityModifier();
+
+    public int GetEffectiveAC()
+    {
+        var ac = ArmorClass;
+        if (HasCondition(CombatCondition.Shielded))
+            ac += 5;
+        return ac;
+    }
 
     public static CombatParticipant FromCharacter(Character character)
     {
@@ -80,10 +130,16 @@ public class CombatParticipant
             ArmorClass = character.ArmorClass,
             Strength = character.Strength,
             Dexterity = character.Dexterity,
+            Constitution = character.Constitution,
+            Intelligence = character.Intelligence,
             Wisdom = character.Wisdom,
+            Charisma = character.Charisma,
             Level = character.Level,
             AttackDice = "1d4",
-            DamageType = DamageType.Bludgeoning
+            DamageType = DamageType.Bludgeoning,
+            CharacterClass = character.Class,
+            SpellSlots = character.GetSpellSlots(),
+            KnownSpellIds = character.KnownSpells.Select(ks => ks.SpellId).ToList()
         };
     }
 
@@ -99,7 +155,10 @@ public class CombatParticipant
             ArmorClass = monster.ArmorClass,
             Strength = monster.Strength,
             Dexterity = monster.Dexterity,
+            Constitution = monster.Constitution,
+            Intelligence = monster.Intelligence,
             Wisdom = monster.Wisdom,
+            Charisma = monster.Charisma,
             Level = monster.Level,
             AttackDice = monster.AttackDice,
             DamageType = monster.DamageType,

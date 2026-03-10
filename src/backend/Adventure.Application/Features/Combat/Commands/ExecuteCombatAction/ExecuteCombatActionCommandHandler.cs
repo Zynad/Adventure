@@ -65,9 +65,10 @@ public class ExecuteCombatActionCommandHandler : IRequestHandler<ExecuteCombatAc
 
         var abilityMod = attacker.GetAbilityModifier(AbilityType.Strength);
         var profBonus = attacker.GetProficiencyBonus();
+        var targetAC = target.GetEffectiveAC();
 
         var attackResult = CombatRules.ResolveAttackWithAdvantage(
-            _dice, abilityMod, profBonus, target.ArmorClass, hasAdvantage, hasDisadvantage);
+            _dice, abilityMod, profBonus, targetAC, hasAdvantage, hasDisadvantage);
 
         // Clear one-shot conditions after attack
         attacker.RemoveCondition(CombatCondition.Hidden);

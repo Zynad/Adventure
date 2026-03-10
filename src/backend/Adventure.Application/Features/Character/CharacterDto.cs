@@ -1,3 +1,5 @@
+using Adventure.Application.Features.Spell;
+
 namespace Adventure.Application.Features.Character;
 
 public record CharacterDto(
@@ -19,4 +21,5 @@ public record CharacterDto(
     int Gold,
     Guid CurrentZoneId,
     int PositionX,
-    int PositionY);
+    int PositionY,
+    IReadOnlyList<SpellSlotDto>? SpellSlots);

@@ -24,6 +24,13 @@ public class CharacterConfiguration : IEntityTypeConfiguration<Character>
             .HasForeignKey(e => e.CharacterId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasMany(c => c.KnownSpells)
+            .WithOne(ks => ks.Character)
+            .HasForeignKey(ks => ks.CharacterId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Property(c => c.SpellSlotsJson).HasMaxLength(500);
+
         builder.HasMany(c => c.Quests)
             .WithOne()
             .HasForeignKey(q => q.CharacterId)

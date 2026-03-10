@@ -139,17 +139,17 @@ Alla CombatActionType-val: Dodge, Dash, Disengage, Help, Hide, UseItem. Monster-
 
 Spell-systemet med spell slots, kända spells och cantrips.
 
-- [ ] Domain: SpellSlot value object (Level, MaxSlots, CurrentSlots), lägg till på Character
-- [ ] Domain: CombatRules — CastSpell (spell save DC = 8 + proficiency + spellcasting mod, spell attack = d20 + proficiency + spellcasting mod)
-- [ ] Domain: SpellcastingAbility per CharacterClass (Wizard=INT, Cleric=WIS, Paladin=CHA, Ranger=WIS)
-- [ ] Application: CastSpellCommand (characterId, spellId, targetId?) — validera känd spell, rätt klass, spell slot tillgänglig
-- [ ] Application: LearnSpellCommand, GetKnownSpellsQuery
-- [ ] Api: Utöka CombatController — POST cast-spell
-- [ ] Api: SpellController — GET known-spells, POST learn
-- [ ] Frontend: Spell-meny i combat (visa kända spells, grayed out om inga slots kvar)
-- [ ] Frontend: Spell slot display i CharacterSidebar ("Level 1: 2/3")
-- [ ] Seed data: 8-10 grundspells (Fire Bolt cantrip, Magic Missile, Cure Wounds, Shield, Healing Word, Guiding Bolt, Thunderwave, Bless)
-- [ ] Seed data: Koppla spells till CharacterClass via RequiredClass
+- [x] Domain: SpellSlot value object (Level, MaxSlots, CurrentSlots), lägg till på Character
+- [x] Domain: CombatRules — CastSpell (spell save DC = 8 + proficiency + spellcasting mod, spell attack = d20 + proficiency + spellcasting mod)
+- [x] Domain: SpellcastingAbility per CharacterClass (Wizard=INT, Cleric=WIS, Paladin=CHA, Ranger=WIS)
+- [x] Application: CastSpellCommand (characterId, spellId, targetId?) — validera känd spell, rätt klass, spell slot tillgänglig
+- [x] Application: LearnSpellCommand, GetKnownSpellsQuery
+- [x] Api: Utöka CombatController — POST cast-spell
+- [x] Api: SpellController — GET known-spells, POST learn
+- [x] Frontend: Spell-meny i combat (visa kända spells, grayed out om inga slots kvar)
+- [x] Frontend: Spell slot display i CharacterSidebar ("Level 1: 2/3")
+- [x] Seed data: 8-10 grundspells (Fire Bolt cantrip, Magic Missile, Cure Wounds, Shield, Healing Word, Guiding Bolt, Thunderwave, Bless)
+- [x] Seed data: Koppla spells till CharacterClass via RequiredClass
 
 ### Fas 2.4: Död, Death Saves & Permanent Död — "Ingen är säker"
 

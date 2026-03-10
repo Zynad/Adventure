@@ -82,6 +82,12 @@ public class CombatTurnResolver
             if (healingDone > 0)
                 character.Heal(healingDone);
 
+            // Persist spell slot state: restore on victory, save current state on defeat
+            if (encounter.Outcome == CombatOutcome.Victory)
+                character.RestoreAllSpellSlots();
+            else
+                character.SetSpellSlotsFromList(playerParticipant.SpellSlots);
+
             await _unitOfWork.SaveChangesAsync(ct);
         }
 
@@ -106,9 +112,13 @@ public class CombatTurnResolver
 
         var abilityMod = monster.GetAbilityModifier(AbilityType.Strength);
         var profBonus = monster.GetProficiencyBonus();
+        var targetAC = target.GetEffectiveAC();
 
         var attackResult = CombatRules.ResolveAttackWithAdvantage(
-            _dice, abilityMod, profBonus, target.ArmorClass, hasAdvantage, hasDisadvantage);
+            _dice, abilityMod, profBonus, targetAC, hasAdvantage, hasDisadvantage);
+
+        // Shield spell wears off after being attacked
+        target.RemoveCondition(CombatCondition.Shielded);
 
         monster.RemoveCondition(CombatCondition.Hidden);
         monster.RemoveCondition(CombatCondition.HasAdvantage);
@@ -122,7 +132,7 @@ public class CombatTurnResolver
             var critText = attackResult.IsCritical ? "CRITICAL HIT! " : "";
             var disadvText = hasDisadvantage && !hasAdvantage ? " (with disadvantage)" : "";
             encounter.AddLogEntry(
-                $"{critText}{monster.Name} hits {target.Name} for {damage} damage!{disadvText} (d20={attackResult.NaturalRoll} +{abilityMod}+{profBonus}={attackResult.TotalRoll} vs AC {target.ArmorClass})");
+                $"{critText}{monster.Name} hits {target.Name} for {damage} damage!{disadvText} (d20={attackResult.NaturalRoll} +{abilityMod}+{profBonus}={attackResult.TotalRoll} vs AC {targetAC})");
 
             if (!target.IsAlive)
                 encounter.AddLogEntry($"{target.Name} has fallen!");
@@ -131,7 +141,7 @@ public class CombatTurnResolver
         {
             var disadvText = hasDisadvantage && !hasAdvantage ? " (with disadvantage)" : "";
             encounter.AddLogEntry(
-                $"{monster.Name} misses {target.Name}.{disadvText} (d20={attackResult.NaturalRoll} +{abilityMod}+{profBonus}={attackResult.TotalRoll} vs AC {target.ArmorClass})");
+                $"{monster.Name} misses {target.Name}.{disadvText} (d20={attackResult.NaturalRoll} +{abilityMod}+{profBonus}={attackResult.TotalRoll} vs AC {targetAC})");
         }
     }
 

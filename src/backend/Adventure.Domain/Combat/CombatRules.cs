@@ -98,4 +98,38 @@ public static class CombatRules
     {
         return dice.RollD20() == 1;
     }
+
+    public static int CalculateSpellSaveDC(int proficiencyBonus, int spellcastingAbilityModifier)
+    {
+        return 8 + proficiencyBonus + spellcastingAbilityModifier;
+    }
+
+    public static AttackResult ResolveSpellAttack(int naturalD20Roll, int spellcastingModifier, int proficiencyBonus, int targetAC)
+    {
+        return ResolveAttack(naturalD20Roll, spellcastingModifier, proficiencyBonus, targetAC);
+    }
+
+    public static bool ResolveSavingThrow(int naturalD20Roll, int abilityModifier, int spellSaveDC)
+    {
+        var total = naturalD20Roll + abilityModifier;
+        return total >= spellSaveDC;
+    }
+
+    public static int RollSpellDamage(IDiceService dice, string damageDice, bool isCritical)
+    {
+        var parsed = DiceRoll.Parse(damageDice);
+        var diceToRoll = isCritical
+            ? new DiceRoll(parsed.Count * 2, parsed.Sides, parsed.Modifier)
+            : parsed;
+
+        var damage = dice.Roll(diceToRoll);
+        return Math.Max(1, damage);
+    }
+
+    public static int RollSpellHealing(IDiceService dice, string healingDice)
+    {
+        var parsed = DiceRoll.Parse(healingDice);
+        var healing = dice.Roll(parsed);
+        return Math.Max(1, healing);
+    }
 }

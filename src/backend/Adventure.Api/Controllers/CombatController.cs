@@ -1,10 +1,12 @@
 using Adventure.Application.Features.Combat;
+using Adventure.Application.Features.Combat.Commands.CastSpell;
 using Adventure.Application.Features.Combat.Commands.ExecuteAttack;
 using Adventure.Application.Features.Combat.Commands.ExecuteCombatAction;
 using Adventure.Application.Features.Combat.Commands.EndTurn;
 using Adventure.Application.Features.Combat.Commands.InitiateCombat;
 using Adventure.Application.Features.Combat.Commands.UseItemInCombat;
 using Adventure.Application.Features.Combat.Queries.GetCombatConsumables;
+using Adventure.Application.Features.Combat.Queries.GetCombatSpells;
 using Adventure.Application.Features.Combat.Queries.GetCombatState;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -67,6 +69,22 @@ public class CombatController : ControllerBase
         Guid characterId, CancellationToken ct)
     {
         var result = await _mediator.Send(new GetCombatConsumablesQuery(characterId), ct);
+        return Ok(result);
+    }
+
+    [HttpPost("cast-spell")]
+    public async Task<ActionResult<CombatActionResultDto>> CastSpell(
+        CastSpellCommand command, CancellationToken ct)
+    {
+        var result = await _mediator.Send(command, ct);
+        return Ok(result);
+    }
+
+    [HttpGet("spells/{characterId:guid}")]
+    public async Task<ActionResult<CombatSpellInfoDto>> GetCombatSpells(
+        Guid characterId, CancellationToken ct)
+    {
+        var result = await _mediator.Send(new GetCombatSpellsQuery(characterId), ct);
         return Ok(result);
     }
 

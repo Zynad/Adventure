@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { CombatStateDto, CombatActionResultDto, CombatConsumableDto } from '../types';
+import type { CombatStateDto, CombatActionResultDto, CombatConsumableDto, CombatSpellInfoDto } from '../types';
 
 export const initiateCombat = (characterId: string, monsterIds: string[]) =>
   apiClient.post<CombatStateDto>('/combat/initiate', { characterId, monsterIds });
@@ -21,3 +21,9 @@ export const getCombatConsumables = (characterId: string) =>
 
 export const getCombatState = (characterId: string) =>
   apiClient.get<CombatStateDto>(`/combat/state/${characterId}`);
+
+export const castSpell = (characterId: string, spellId: string, targetId?: string) =>
+  apiClient.post<CombatActionResultDto>('/combat/cast-spell', { characterId, spellId, targetId });
+
+export const getCombatSpells = (characterId: string) =>
+  apiClient.get<CombatSpellInfoDto>(`/combat/spells/${characterId}`);

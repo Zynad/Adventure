@@ -53,6 +53,31 @@ export function CharacterSidebar() {
           </div>
         ))}
       </div>
+
+      {character.spellSlots && character.spellSlots.length > 0 && (
+        <div>
+          <p className="text-xs text-gray-400 font-semibold mb-1">Spell Slots</p>
+          <div className="space-y-1">
+            {character.spellSlots.map((slot) => (
+              <div key={slot.level} className="flex items-center gap-2 text-xs">
+                <span className="text-gray-500 w-10">Lvl {slot.level}</span>
+                <div className="flex gap-0.5">
+                  {Array.from({ length: slot.maxSlots }, (_, i) => (
+                    <span
+                      key={i}
+                      className={`w-3 h-3 rounded-full border ${
+                        i < slot.currentSlots
+                          ? 'bg-indigo-500 border-indigo-400'
+                          : 'bg-gray-700 border-gray-600'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

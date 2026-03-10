@@ -6,11 +6,13 @@ interface CombatActionMenuProps {
   isComplete: boolean;
   isProcessing: boolean;
   selectedAction: number | null;
+  isSpellcaster: boolean;
   onSelectAction: (action: CombatActionType) => void;
 }
 
 const actions = [
   { type: CombatActionType.Attack, label: 'Attack', color: 'bg-red-700 hover:bg-red-600', needsTarget: true, targetType: 'enemy' as const },
+  { type: CombatActionType.CastSpell, label: 'Cast Spell', color: 'bg-indigo-700 hover:bg-indigo-600', needsTarget: false, spellcasterOnly: true },
   { type: CombatActionType.Dodge, label: 'Dodge', color: 'bg-blue-700 hover:bg-blue-600', needsTarget: false },
   { type: CombatActionType.Disengage, label: 'Disengage', color: 'bg-gray-600 hover:bg-gray-500', needsTarget: false },
   { type: CombatActionType.Help, label: 'Help', color: 'bg-green-700 hover:bg-green-600', needsTarget: true, targetType: 'ally' as const },
@@ -24,6 +26,7 @@ export function CombatActionMenu({
   isComplete,
   isProcessing,
   selectedAction,
+  isSpellcaster,
   onSelectAction,
 }: CombatActionMenuProps) {
   const disabled = !isPlayerTurn || hasTakenAction || isComplete || isProcessing;
@@ -31,6 +34,8 @@ export function CombatActionMenu({
   return (
     <div className="flex flex-wrap gap-2">
       {actions.map((action) => {
+        if ('spellcasterOnly' in action && action.spellcasterOnly && !isSpellcaster) return null;
+
         const isSelected = selectedAction === action.type;
         return (
           <button

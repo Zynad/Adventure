@@ -1,16 +1,19 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { executeCombatAction, endTurn, useItemInCombat } from '../../api/combatApi';
+import { executeCombatAction, endTurn, useItemInCombat, castSpell } from '../../api/combatApi';
 import { getGameState } from '../../api/gameApi';
 import { useGameStore } from '../../store/gameStore';
 import { useCombatStore } from '../../store/combatStore';
-import { CombatActionType } from '../../types';
+import { CombatActionType, CharacterClass } from '../../types';
 import { TurnOrderBar } from './TurnOrderBar';
 import { CombatParticipantCard } from './CombatParticipantCard';
 import { CombatLogPanel } from './CombatLogPanel';
 import { CombatResultOverlay } from './CombatResultOverlay';
 import { CombatActionMenu, getActionTargetType } from './CombatActionMenu';
 import { ItemPickerPanel } from './ItemPickerPanel';
+import { SpellPickerPanel } from './SpellPickerPanel';
+
+const SPELLCASTER_CLASSES = [CharacterClass.Wizard, CharacterClass.Cleric, CharacterClass.Paladin, CharacterClass.Ranger];
 
 export function CombatView() {
   const navigate = useNavigate();
@@ -24,12 +27,18 @@ export function CombatView() {
   const selectedAction = useCombatStore((s) => s.selectedAction);
   const isProcessing = useCombatStore((s) => s.isProcessing);
   const showItemPicker = useCombatStore((s) => s.showItemPicker);
+  const showSpellPicker = useCombatStore((s) => s.showSpellPicker);
+  const pendingSpellId = useCombatStore((s) => s.pendingSpellId);
   const setEncounter = useCombatStore((s) => s.setEncounter);
   const setSelectedTargetId = useCombatStore((s) => s.setSelectedTargetId);
   const setSelectedAction = useCombatStore((s) => s.setSelectedAction);
   const setIsProcessing = useCombatStore((s) => s.setIsProcessing);
   const setShowItemPicker = useCombatStore((s) => s.setShowItemPicker);
+  const setShowSpellPicker = useCombatStore((s) => s.setShowSpellPicker);
+  const setPendingSpellId = useCombatStore((s) => s.setPendingSpellId);
   const clearCombat = useCombatStore((s) => s.clearCombat);
+
+  const isSpellcaster = character ? SPELLCASTER_CLASSES.includes(character.characterClass) : false;
 
   const handleSelectAction = useCallback((action: CombatActionType) => {
     if (!character || !encounter || isProcessing) return;
@@ -38,12 +47,25 @@ export function CombatView() {
 
     if (action === CombatActionType.UseItem) {
       setShowItemPicker(true);
+      setShowSpellPicker(false);
       setSelectedAction(null);
       setSelectedTargetId(null);
+      setPendingSpellId(null);
+      return;
+    }
+
+    if (action === CombatActionType.CastSpell) {
+      setShowSpellPicker(true);
+      setShowItemPicker(false);
+      setSelectedAction(null);
+      setSelectedTargetId(null);
+      setPendingSpellId(null);
       return;
     }
 
     setShowItemPicker(false);
+    setShowSpellPicker(false);
+    setPendingSpellId(null);
 
     if (targetType) {
       // Needs target selection — set action and wait for click
@@ -61,6 +83,7 @@ export function CombatView() {
 
     setIsProcessing(true);
     setShowItemPicker(false);
+    setShowSpellPicker(false);
     try {
       const { data } = await executeCombatAction(character.id, action, targetId);
       setEncounter(data.updatedState);
@@ -74,9 +97,15 @@ export function CombatView() {
   }, [character, encounter, isProcessing, setEncounter, setSelectedAction, setSelectedTargetId, setIsProcessing, addNarrativeEvent]);
 
   const handleTargetSelect = useCallback((targetId: string) => {
+    // If we have a pending spell that needs a target
+    if (pendingSpellId) {
+      handleCastSpellWithTarget(pendingSpellId, targetId);
+      return;
+    }
+
     if (selectedAction === null || isProcessing) return;
     executeAction(selectedAction as CombatActionType, targetId);
-  }, [selectedAction, isProcessing, executeAction]);
+  }, [selectedAction, isProcessing, executeAction, pendingSpellId]);
 
   const handleEndTurn = useCallback(async () => {
     if (!character || !encounter || isProcessing) return;
@@ -107,6 +136,39 @@ export function CombatView() {
     }
   }, [character, encounter, isProcessing, setEncounter, setIsProcessing, setShowItemPicker, addNarrativeEvent]);
 
+  const handleCastSpell = useCallback((spellId: string, targetType: string) => {
+    if (!character || !encounter || isProcessing) return;
+
+    setShowSpellPicker(false);
+
+    if (targetType === 'enemy' || targetType === 'ally') {
+      // Need to select a target first
+      setPendingSpellId(spellId);
+      setSelectedAction(targetType === 'enemy' ? CombatActionType.Attack : CombatActionType.Help);
+      return;
+    }
+
+    // Self or no target — cast immediately
+    handleCastSpellWithTarget(spellId);
+  }, [character, encounter, isProcessing]);
+
+  const handleCastSpellWithTarget = useCallback(async (spellId: string, targetId?: string) => {
+    if (!character || !encounter || isProcessing) return;
+
+    setIsProcessing(true);
+    setPendingSpellId(null);
+    setSelectedAction(null);
+    setSelectedTargetId(null);
+    try {
+      const { data } = await castSpell(character.id, spellId, targetId);
+      setEncounter(data.updatedState);
+    } catch {
+      addNarrativeEvent('Failed to cast spell.');
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [character, encounter, isProcessing, setEncounter, setIsProcessing, setPendingSpellId, setSelectedAction, setSelectedTargetId, addNarrativeEvent]);
+
   const handleContinue = useCallback(async () => {
     if (!character || !encounter) return;
 
@@ -133,12 +195,21 @@ export function CombatView() {
 
   const players = encounter.participants.filter((p) => p.participantType !== 2);
   const enemies = encounter.participants.filter((p) => p.participantType === 2);
-  const targetType = selectedAction !== null ? getActionTargetType(selectedAction as CombatActionType) : null;
+
+  // Determine target type for selection highlighting
+  let targetType: 'enemy' | 'ally' | null = null;
+  if (pendingSpellId) {
+    // Spell targeting mode
+    targetType = selectedAction === CombatActionType.Attack ? 'enemy' : 'ally';
+  } else if (selectedAction !== null) {
+    targetType = getActionTargetType(selectedAction as CombatActionType);
+  }
 
   const getStatusText = () => {
     if (isProcessing) return 'Processing...';
     if (!encounter.isPlayerTurn) return 'Waiting for enemies...';
     if (encounter.hasTakenAction) return 'Click End Turn to continue.';
+    if (pendingSpellId) return targetType === 'enemy' ? 'Select an enemy target for your spell.' : 'Select an ally target for your spell.';
     if (selectedAction === CombatActionType.Attack) return 'Select an enemy to attack.';
     if (selectedAction === CombatActionType.Help) return 'Select an ally to help.';
     return 'Choose an action.';
@@ -207,6 +278,7 @@ export function CombatView() {
                   isComplete={encounter.isComplete}
                   isProcessing={isProcessing}
                   selectedAction={selectedAction}
+                  isSpellcaster={isSpellcaster}
                   onSelectAction={handleSelectAction}
                 />
 
@@ -225,6 +297,14 @@ export function CombatView() {
                     characterId={character.id}
                     onUseItem={handleUseItem}
                     onClose={() => setShowItemPicker(false)}
+                  />
+                )}
+
+                {showSpellPicker && character && (
+                  <SpellPickerPanel
+                    characterId={character.id}
+                    onCastSpell={handleCastSpell}
+                    onClose={() => setShowSpellPicker(false)}
                   />
                 )}
               </div>

@@ -3,6 +3,7 @@ using System;
 using Adventure.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Adventure.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AdventureDbContext))]
-    partial class AdventureDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260310213141_AddSpellSystem")]
+    partial class AddSpellSystem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.3");

@@ -42,3 +42,17 @@ public record CombatConsumableDto(
     string EffectType,
     int EffectValue,
     int Quantity);
+
+public record CombatSpellDto(
+    Guid SpellId,
+    string Name,
+    int SpellLevel,
+    string? DamageDice,
+    string? HealingDice,
+    bool IsCantrip,
+    bool CanCast,
+    string TargetType);
+
+public record CombatSpellInfoDto(
+    IReadOnlyList<CombatSpellDto> Spells,
+    IReadOnlyList<Spell.SpellSlotDto> SpellSlots);

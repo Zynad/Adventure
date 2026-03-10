@@ -1,0 +1,26 @@
+[
+  {
+    "id": "b1000001-0000-0000-0000-000000000001",
+    "name": "Elder Mirael",
+    "description": "The wise village elder, her silver hair braided with oak leaves. She has guided Oakhaven through many hardships and knows every secret of the surrounding lands.",
+    "zoneId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "positionX": 5,
+    "positionY": 3,
+    "dialogueTree": "[{\"id\":\"root\",\"text\":\"Welcome, traveler. Oakhaven has seen better days. Goblins have been spotted in the forest to the east, and our people are afraid to venture beyond the village.\",\"speakerName\":\"Elder Mirael\",\"options\":[{\"text\":\"Tell me more about the goblins.\",\"nextNodeId\":\"goblins\",\"condition\":null},{\"text\":\"Is there anything I can do to help?\",\"nextNodeId\":\"help\",\"condition\":null},{\"text\":\"Farewell.\",\"nextNodeId\":null,\"condition\":null}]},{\"id\":\"goblins\",\"text\":\"They appeared a fortnight ago, raiding farms at night. We have lost livestock and our woodcutter was injured. They seem to have a camp deeper in the Darkwood.\",\"speakerName\":\"Elder Mirael\",\"options\":[{\"text\":\"I will look into it.\",\"nextNodeId\":\"help\",\"condition\":null},{\"text\":\"That sounds dangerous. Farewell.\",\"nextNodeId\":null,\"condition\":null}]},{\"id\":\"help\",\"text\":\"You would do that? Bless you, adventurer. If you can drive the goblins from the forest, Oakhaven would be forever grateful. Speak to Torvin the Smith — he might have equipment to aid you.\",\"speakerName\":\"Elder Mirael\",\"options\":[{\"text\":\"I will speak with Torvin.\",\"nextNodeId\":null,\"condition\":null},{\"text\":\"I will head out right away.\",\"nextNodeId\":null,\"condition\":null}]}]",
+    "isQuestGiver": true,
+    "isMerchant": false,
+    "factionId": null
+  },
+  {
+    "id": "b1000001-0000-0000-0000-000000000002",
+    "name": "Torvin the Smith",
+    "description": "A burly dwarf blacksmith who settled in Oakhaven years ago. His forge produces some of the finest blades in the region, and he always has equipment to sell.",
+    "zoneId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "positionX": 7,
+    "positionY": 2,
+    "dialogueTree": "[{\"id\":\"root\",\"text\":\"Ha! A new face in Oakhaven. Name's Torvin. I forge the finest blades this side of the Iron Mountains. Need something?\",\"speakerName\":\"Torvin the Smith\",\"options\":[{\"text\":\"What do you have for sale?\",\"nextNodeId\":\"shop\",\"condition\":null},{\"text\":\"Elder Mirael mentioned you might help with the goblin problem.\",\"nextNodeId\":\"goblins\",\"condition\":null},{\"text\":\"Just looking around. Farewell.\",\"nextNodeId\":null,\"condition\":null}]},{\"id\":\"shop\",\"text\":\"I have got swords, shields, and armor. Nothing fancy, but it will keep you alive. Take a look at my wares.\",\"speakerName\":\"Torvin the Smith\",\"options\":[{\"text\":\"Thanks, I will browse.\",\"nextNodeId\":null,\"condition\":null}]},{\"id\":\"goblins\",\"text\":\"Aye, nasty creatures. I have seen their handiwork. Tell you what — prove yourself against those goblins, and I will forge you something special. In the meantime, I can sell you gear at a fair price.\",\"speakerName\":\"Torvin the Smith\",\"options\":[{\"text\":\"Sounds like a deal.\",\"nextNodeId\":null,\"condition\":null},{\"text\":\"What can you tell me about the area?\",\"nextNodeId\":\"area\",\"condition\":null}]},{\"id\":\"area\",\"text\":\"Oakhaven sits at the edge of the Darkwood. To the north are the Silverstream Hills, rich with ore. South leads to the King's Road and eventually the capital. East is where those goblins lurk.\",\"speakerName\":\"Torvin the Smith\",\"options\":[{\"text\":\"Good to know. Thanks, Torvin.\",\"nextNodeId\":null,\"condition\":null}]}]",
+    "isQuestGiver": false,
+    "isMerchant": true,
+    "factionId": null
+  }
+]

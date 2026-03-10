@@ -1,0 +1,24 @@
+[
+  {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "Oakhaven Village",
+    "description": "A peaceful village nestled among ancient oak trees. Cobblestone paths wind between timber-framed houses, and a gentle stream runs through the center. The villagers go about their daily lives, but whispers of goblins in the nearby forest have everyone on edge.",
+    "zoneType": 1,
+    "width": 10,
+    "height": 10,
+    "worldMapX": 5,
+    "worldMapY": 5,
+    "isDiscovered": true
+  },
+  {
+    "id": "d2000001-0000-0000-0000-000000000001",
+    "name": "Darkwood Forest",
+    "description": "A dense, ancient forest where the canopy blocks most sunlight. Gnarled roots crisscross the dirt paths, and strange sounds echo between the trees. Goblin tracks are visible in the mud, and the air smells of damp earth and something foul.",
+    "zoneType": 3,
+    "width": 8,
+    "height": 8,
+    "worldMapX": 6,
+    "worldMapY": 5,
+    "isDiscovered": false
+  }
+]

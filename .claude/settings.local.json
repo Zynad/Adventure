@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet:*)",
+      "Bash(node:*)",
+      "Bash(docker:*)",
+      "WebSearch",
+      "Bash(npm:*)",
+      "Bash(git:*)",
+      "Bash(ls:*)",
+      "Bash(npx tsc:*)",
+      "Bash(export:*)",
+      "Bash(python3:*)",
+      "Bash(mv Npc:*)",
+      "Bash(ls -la src/backend/Adventure.Domain/Enums/ | grep \".cs$\")",
+      "Bash(grep -n \"class Monster\" /c/Kod/Adventure/src/backend/Adventure.Domain/Entities/*.cs)"
+    ]
+  }
+}

@@ -1,0 +1,56 @@
+# =========================
+# .NET / C#
+# =========================
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.db
+*.db-shm
+*.db-wal
+.vs/
+*.csproj.user
+appsettings.*.local.json
+
+# NuGet
+*.nupkg
+**/packages/*
+!**/packages/build/
+
+# =========================
+# Node / Frontend
+# =========================
+node_modules/
+dist/
+.cache/
+*.tsbuildinfo
+
+# =========================
+# IDE
+# =========================
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================
+# Docker
+# =========================
+docker-compose.override.local.yml
+
+# =========================
+# Misc
+# =========================
+*.log
+*.env
+*.env.local

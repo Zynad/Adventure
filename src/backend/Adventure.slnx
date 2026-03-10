@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/tests/">
+    <Project Path="tests/Adventure.Api.Tests/Adventure.Api.Tests.csproj" />
+    <Project Path="tests/Adventure.Application.Tests/Adventure.Application.Tests.csproj" />
+    <Project Path="tests/Adventure.Domain.Tests/Adventure.Domain.Tests.csproj" />
+  </Folder>
+  <Project Path="Adventure.Api/Adventure.Api.csproj" />
+  <Project Path="Adventure.Application/Adventure.Application.csproj" />
+  <Project Path="Adventure.Domain/Adventure.Domain.csproj" />
+  <Project Path="Adventure.Infrastructure/Adventure.Infrastructure.csproj" />
+</Solution>

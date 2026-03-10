@@ -1,0 +1,24 @@
+services:
+  api:
+    build:
+      context: ./src/backend
+      dockerfile: Adventure.Api/Dockerfile
+    ports:
+      - "5000:8080"
+    volumes:
+      - game-data:/app/data
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/adventure.db
+
+  frontend:
+    build:
+      context: ./src/frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+
+volumes:
+  game-data:
